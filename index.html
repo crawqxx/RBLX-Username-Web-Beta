@@ -77,7 +77,7 @@
         function showMainMenu() {
             clearOutput();
             printWatermark();
-            printToOutput('Main Menu:\n1) Generate Usernames\n2) Check Username\n3) Settings\n4) Exit\nType the number to select an option.');
+            printToOutput('Main Menu:\n1) Generate Usernames\n2) Check Username\n3) Settings\nType the number to select an option.');
             state = 'mainMenu';
         }
 
@@ -95,11 +95,8 @@
                     state = 'settings';
                     showSettingsPage();
                     break;
-                case '4':
-                    window.close();
-                    break;
                 default:
-                    reloadPage();
+                    printToOutput('Invalid option. Please enter a valid number.');
             }
         }
 
@@ -117,7 +114,7 @@
             } else if (input === '') {
                 showMainMenu();
             } else {
-                reloadPage();
+                printToOutput('Invalid input. Please enter a valid number.');
             }
         }
 
@@ -164,26 +161,23 @@
         function showSettingsPage() {
             clearOutput();
             printWatermark();
-            printToOutput('Settings Menu:\n1) Toggle showing taken usernames (current: ' + (showTakenUsernames ? 'On' : 'Off') + ')\n2) Filters (current: ' + getFilterName() + ')\n3) Return to Main Menu\n4) Exit\nSelect an option (or press Enter to return):');
+            printToOutput('Settings Menu:\n1) Toggle showing taken usernames (current: ' + (showTakenUsernames ? 'On' : 'Off') + ')\n2) Filters (current: ' + getFilterName() + ')\nSelect an option (or press Enter to return):');
         }
 
         function handleSettings(input) {
             switch (input) {
                 case '1':
                     showTakenUsernames = !showTakenUsernames;
-                    printToOutput(`Show taken usernames: ${showTakenUsernames ? 'On' : 'Off'}`);
+                    showSettingsPage(); // Refresh the settings page
                     break;
                 case '2':
                     showFilterOptions();
                     break;
-                case '3':
+                case '':
                     showMainMenu();
                     break;
-                case '4':
-                    window.close();
-                    break;
                 default:
-                    reloadPage();
+                    printToOutput('Invalid option. Please enter a valid number.');
             }
         }
 
@@ -197,9 +191,9 @@
             const filterChoice = parseInt(input);
             if (filterChoice >= 1 && filterChoice <= 5) {
                 generationFilter = filterChoice;
-                printToOutput(`Filter set to: ${getFilterName()}`);
+                showSettingsPage(); // Refresh the settings page
             } else {
-                reloadPage();
+                printToOutput('Invalid filter choice. Please enter a number between 1 and 5.');
             }
         }
 
@@ -325,10 +319,6 @@
             } catch (error) {
                 return 'error';
             }
-        }
-
-        function reloadPage() {
-            location.reload();
         }
     </script>
 </body>
