@@ -95,12 +95,12 @@ function randomInt(min, max) {
 async function checkUsernameAvailability(username) {
     const response = await fetch(`https://auth.roblox.com/v1/usernames/validate?username=${username}&birthday=2006-09-21`);
     const result = await response.json();
-    return result.code;
+    return result.errors ? 'Error' : result.message;
 }
 
 function displayUsername(username, status) {
-    const statusMessage = status === 0 ? 'Available' : 'Taken';
-    const statusColor = status === 0 ? 'green' : 'red';
+    const statusMessage = status === 'Username is valid' ? 'Available' : 'Taken';
+    const statusColor = statusMessage === 'Available' ? 'green' : 'red';
     const container = document.createElement('div');
     container.innerHTML = `<span style="color: ${statusColor};">${username}: ${statusMessage}</span>`;
     document.getElementById('generated-usernames').appendChild(container);
