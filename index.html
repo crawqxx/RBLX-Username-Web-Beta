@@ -20,7 +20,7 @@
             overflow-y: auto;
             border: 1px solid #333;
         }
-        input, button {
+        input {
             font-family: Consolas, monospace;
             margin: 5px 0;
             background-color: #1e1e1e;
@@ -30,208 +30,191 @@
         .green { color: #00ff00; }
         .red { color: #ff0000; }
         .cyan { color: #00ffff; }
+        .magenta { color: #ff00ff; }
     </style>
 </head>
 <body>
     <div id="output"></div>
-    <input type="text" id="input" placeholder="Enter command..." onkeypress="handleKeyPress(event)" />
+    <input type="text" id="input" placeholder="Enter command..." />
 
     <script>
         const outputDiv = document.getElementById('output');
         const inputField = document.getElementById('input');
         let showTakenUsernames = true;
         let generationFilter = 1;
-        let generatedUsernamesCount = 0;
+        let state = 'mainMenu';
 
         document.addEventListener('DOMContentLoaded', () => {
             showMainMenu();
         });
 
-        function handleKeyPress(event) {
+        inputField.addEventListener('keypress', function(event) {
             if (event.key === 'Enter') {
-                executeCommand(inputField.value.trim());
+                handleInput(inputField.value.trim());
                 inputField.value = '';
             }
-        }
+        });
 
-        async function executeCommand(command) {
-            if (command === '1') {
-                showWatermark();
-                await handleGeneration();
-            } else if (command === '2') {
-                await usernameChecker();
-            } else if (command === '3') {
-                showSettingsMenu();
-            } else if (command === '4') {
-                window.close();
-            } else {
-                printToOutput('Unknown command.');
+        function handleInput(input) {
+            switch (state) {
+                case 'mainMenu':
+                    handleMainMenu(input);
+                    break;
+                case 'generate':
+                    handleGenerate(input);
+                    break;
+                case 'usernameChecker':
+                    handleUsernameChecker(input);
+                    break;
+                case 'settings':
+                    handleSettings(input);
+                    break;
             }
         }
 
-        function showWatermark() {
-            printToOutput(`
-    ░█████╗░██████╗░░█████╗░░██╗░░░░░░░██╗░██████╗░██╗░░██╗██╗░░██╗
-    ██╔══██╗██╔══██╗██╔══██╗░██║░░██╗░░██║██╔═══██╗╚██╗██╔╝╚██╗██╔╝
-    ██║░░╚═╝██████╔╝███████║░╚██╗████╗██╔╝██║██╗██║░╚███╔╝░░╚███╔╝░
-    ██║░░██╗██╔══██╗██╔══██║░░████╔═████║░╚██████╔╝░██╔██╗░░██╔██╗░
-    ╚█████╔╝██║░░██║██║░░██║░░╚██╔╝░╚██╔╝░░╚═██╔═╝░██╔╝╚██╗██╔╝╚██╗
-    ░╚════╝░╚═╝░░╚═╝╚═╝░░╚═╝░░░╚═╝░░░╚═╝░░░░░╚═╝░░░╚═╝░░╚═╝╚═╝░░╚═╝
-          
-                        RBLX-Username v1.1 Beta
-            `);
+        function showMainMenu() {
+            clearOutput();
+            printWatermark();
+            printToOutput('Main Menu:\n1) Generate Usernames\n2) Check Username\n3) Settings\n4) Exit\nType the number to select an option.');
+            state = 'mainMenu';
         }
 
-        async function handleGeneration() {
-            printToOutput('Enter how many usernames you want to generate (or press Enter to return):');
-            inputField.focus();
-
-            const number = await getNumberInput();
-            if (number !== null) {
-                clearOutput();
-                printToOutput(`Generating ${number} usernames...`);
-                for (let i = 0; i < number; i++) {
-                    let username = generateUsernameByFilter();
-                    if (!showTakenUsernames) {
-                        let isTaken = await checkUsernameStatus(username);
-                        if (isTaken) {
-                            printToOutput(`${username} - Account exists (taken), regenerating...`);
-                            username = generateUsernameByFilter();
-                        }
-                    }
-                    printToOutput(`Generated: ${username}`);
-                    generatedUsernamesCount++;
-                }
-                printToOutput('Press Enter to Return to generation page');
-            }
-        }
-
-        function generateUsernameByFilter() {
-            switch (generationFilter) {
-                case 1:
-                    return generateRandomUsername(5);
-                case 2:
-                    return generate6LetterUsername();
-                case 3:
-                    return generate5SymbolsWith3Same();
-                case 4:
-                    return generate6SymbolsWith3Or4Same();
-                case 5:
-                    return generateThinName();
+        function handleMainMenu(input) {
+            switch (input) {
+                case '1':
+                    state = 'generate';
+                    showGeneratePage();
+                    break;
+                case '2':
+                    state = 'usernameChecker';
+                    showUsernameCheckerPage();
+                    break;
+                case '3':
+                    state = 'settings';
+                    showSettingsPage();
+                    break;
+                case '4':
+                    window.close();
+                    break;
                 default:
-                    return generateRandomUsername(5);
+                    printToOutput('Invalid option. Please select a valid number.');
             }
         }
 
-        async function getNumberInput() {
-            return new Promise((resolve) => {
-                const handleInput = (event) => {
-                    if (event.key === 'Enter') {
-                        const value = parseInt(inputField.value.trim());
-                        if (!isNaN(value) && value > 0) {
-                            resolve(value);
-                        } else {
-                            resolve(null);
-                        }
-                        inputField.removeEventListener('keypress', handleInput);
-                    }
-                };
-                inputField.addEventListener('keypress', handleInput);
-            });
+        function showGeneratePage() {
+            clearOutput();
+            printWatermark();
+            printToOutput('Generating Usernames:\nEnter how many usernames you want to generate (or press Enter to return):');
         }
 
-        async function usernameChecker() {
-            printToOutput('Enter a username to check (or press Enter to return):');
-            inputField.focus();
+        async function handleGenerate(input) {
+            if (!isNaN(input) && input > 0) {
+                await generateUsernames(parseInt(input));
+                printToOutput('Press Enter to Return to the generation page.');
+                state = 'generate';
+            } else if (input === '') {
+                showMainMenu();
+            } else {
+                printToOutput('Invalid number. Please enter a positive number.');
+            }
+        }
 
-            const username = await getTextInput();
-            if (username !== null) {
-                clearOutput();
-                const status = await checkUsernameStatus(username);
+        async function generateUsernames(number) {
+            printToOutput(`Generating ${number} usernames...`);
+            for (let i = 0; i < number; i++) {
+                let username = generateUsernameByFilter();
+                if (!showTakenUsernames) {
+                    let isTaken = await checkUsernameStatus(username);
+                    if (isTaken) {
+                        printToOutput(`${username} - Account exists (taken), regenerating...`);
+                        username = generateUsernameByFilter();
+                    }
+                }
+                printToOutput(`Generated: ${username}`);
+            }
+        }
+
+        function showUsernameCheckerPage() {
+            clearOutput();
+            printWatermark();
+            printToOutput('Username Checker:\nEnter a username to check (or press Enter to return):');
+        }
+
+        async function handleUsernameChecker(input) {
+            if (input !== '') {
+                const status = await checkUsernameStatus(input);
                 if (status === 'banned') {
-                    printToOutput(`${username} - Account is banned`, 'red');
+                    printToOutput(`${input} - Account is banned`);
                 } else if (status === true) {
-                    printToOutput(`${username} - Account exists (taken)`, 'red');
+                    printToOutput(`${input} - Account exists (taken)`);
                 } else if (status === false) {
-                    printToOutput(`${username} - Account does not exist (available)`, 'green');
-                } else if (status === 2) {
-                    printToOutput(`${username} - Username is inappropriate for Roblox`, 'red');
-                } else if (status === 3) {
-                    printToOutput(`${username} - Username must be 3 to 20 characters long.`, 'red');
-                } else if (status === 4) {
-                    printToOutput(`${username} - Username cannot start or end with _`, 'red');
-                } else if (status === 7) {
-                    printToOutput(`${username} - Only a-z, A-Z, 0-9, and _ are allowed`, 'red');
+                    printToOutput(`${input} - Account does not exist (available)`);
                 } else {
-                    printToOutput(`${username} - Unknown error`, 'red');
+                    printToOutput(`${input} - Unknown error`);
                 }
                 printToOutput('Press Enter to return to the username checker...');
-            }
-        }
-
-        async function getTextInput() {
-            return new Promise((resolve) => {
-                const handleInput = (event) => {
-                    if (event.key === 'Enter') {
-                        const value = inputField.value.trim();
-                        resolve(value.length > 0 ? value : null);
-                        inputField.removeEventListener('keypress', handleInput);
-                    }
-                };
-                inputField.addEventListener('keypress', handleInput);
-            });
-        }
-
-        function showSettingsMenu() {
-            clearOutput();
-            printToOutput(`Settings Menu:
-1) Toggle showing taken usernames (current: ${showTakenUsernames ? 'On' : 'Off'})
-2) Filters (current: ${getFilterName()})
-Select an option (or press Enter to return):`);
-            inputField.focus();
-        }
-
-        function getFilterName() {
-            switch (generationFilter) {
-                case 1: return 'Random 5 Symbol (default)';
-                case 2: return '6 Letters';
-                case 3: return '5 Symbols with 3 Same Symbols';
-                case 4: return '6 Symbols with 3 or 4 Same Symbols';
-                case 5: return 'Thin Name';
-                default: return 'Unknown';
-            }
-        }
-
-        function updateSettings(command) {
-            if (command === '1') {
-                showTakenUsernames = !showTakenUsernames;
-                printToOutput(`Show taken usernames: ${showTakenUsernames ? 'On' : 'Off'}`);
-            } else if (command === '2') {
-                showFilterSelection();
+                state = 'usernameChecker';
             } else {
-                printToOutput('Invalid settings command.');
+                showMainMenu();
             }
         }
 
-        function showFilterSelection() {
+        function showSettingsPage() {
             clearOutput();
-            printToOutput(`Select a filter:
-1) Random 5 Symbol (default)
-2) 6 Letters
-3) 5 Symbols with 3 Same Symbols
-4) 6 Symbols with 3 or 4 Same Symbols
-5) Thin Name (5-6 symbols using only 't, i, l, 1, j')
-Enter your choice (1-5):`);
-            inputField.focus();
+            printWatermark();
+            printToOutput('Settings Menu:\n1) Toggle showing taken usernames (current: ' + (showTakenUsernames ? 'On' : 'Off') + ')\n2) Filters (current: ' + getFilterName() + ')\n3) Return to Main Menu\n4) Exit\nSelect an option (or press Enter to return):');
         }
 
-        async function handleFilterSelection() {
-            const filterChoice = await getNumberInput();
+        function handleSettings(input) {
+            switch (input) {
+                case '1':
+                    showTakenUsernames = !showTakenUsernames;
+                    printToOutput(`Show taken usernames: ${showTakenUsernames ? 'On' : 'Off'}`);
+                    break;
+                case '2':
+                    showFilterOptions();
+                    break;
+                case '3':
+                    showMainMenu();
+                    break;
+                case '4':
+                    window.close();
+                    break;
+                default:
+                    printToOutput('Invalid option. Please select a valid number.');
+            }
+        }
+
+        function showFilterOptions() {
+            clearOutput();
+            printWatermark();
+            printToOutput('Select a filter:\n1) Random 5 Symbol (default)\n2) 6 Letters\n3) 5 Symbols with 3 Same Symbols\n4) 6 Symbols with 3 or 4 Same Symbols\n5) Thin Name (5-6 symbols using only t, i, l, 1, j)\nEnter your choice (1-5):');
+        }
+
+        function handleFilterChoice(input) {
+            const filterChoice = parseInt(input);
             if (filterChoice >= 1 && filterChoice <= 5) {
                 generationFilter = filterChoice;
                 printToOutput(`Filter set to: ${getFilterName()}`);
             } else {
                 printToOutput('Invalid filter choice.');
+            }
+        }
+
+        function getFilterName() {
+            switch (generationFilter) {
+                case 1:
+                    return 'Random 5 Symbol';
+                case 2:
+                    return '6 Letters';
+                case 3:
+                    return '5 Symbols with 3 Same Symbols';
+                case 4:
+                    return '6 Symbols with 3 or 4 Same Symbols';
+                case 5:
+                    return 'Thin Name';
+                default:
+                    return 'Random 5 Symbol';
             }
         }
 
@@ -245,6 +228,30 @@ Enter your choice (1-5):`);
 
         function clearOutput() {
             outputDiv.innerHTML = '';
+        }
+
+        function printWatermark() {
+            const watermark = `
+░█████╗░██████╗░░█████╗░░██╗░░░░░░░██╗░██████╗░██╗░░██╗██╗░░██╗
+██╔══██╗██╔══██╗██╔══██╗░██║░░██╗░░██║██╔═══██╗╚██╗██╔╝╚██╗██╔╝
+██║░░╚═╝██████╔╝███████║░╚██╗████╗██╔╝██║██╗██║░╚███╔╝░░╚███╔╝░
+██║░░██╗██╔══██╗██╔══██║░░████╔═████║░╚██████╔╝░██╔██╗░░██╔██╗░
+╚█████╔╝██║░░██║██║░░██║░░╚██╔╝░╚██╔╝░░╚═██╔═╝░██╔╝╚██╗██╔╝╚██╗
+░╚════╝░╚═╝░░╚═╝╚═╝░░╚═╝░░░╚═╝░░░╚═╝░░░░░╚═╝░░░╚═╝░░╚═╝╚═╝░░╚═╝
+
+                        RBLX-Username v1.1 Beta
+            `;
+            printToOutput(watermark, 'cyan');
+        }
+
+        function generateUsernameByFilter() {
+            // Placeholder function for generating usernames based on the selected filter
+            return 'username' + Math.floor(Math.random() * 10000);
+        }
+
+        async function checkUsernameStatus(username) {
+            // Placeholder function for checking username status
+            return Math.random() > 0.5;
         }
     </script>
 </body>
