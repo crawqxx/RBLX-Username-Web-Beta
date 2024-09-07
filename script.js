@@ -1,127 +1,107 @@
-
 let showTakenUsernames = true;
-let generationFilter = 1;
+let generationFilter = 1; // 1: Random 5 Symbols, 2: 6 Letters, etc.
 
-// Function to generate usernames
-function generateUsernames() {
-    let numberOfUsernames = prompt('Enter how many usernames you want to generate:');
-    let output = document.getElementById('output');
-    output.innerHTML = 'Generating ' + numberOfUsernames + ' usernames...';
+document.getElementById('generate-usernames').addEventListener('click', () => {
+    toggleVisibility('main-menu', 'generation-section');
+});
 
-    for (let i = 0; i < numberOfUsernames; i++) {
-        let username = generateUsernameByFilter();
-        output.innerHTML += '<br>' + username;
+document.getElementById('username-checker').addEventListener('click', () => {
+    alert("Username checker coming soon!");
+});
+
+document.getElementById('settings').addEventListener('click', () => {
+    toggleVisibility('main-menu', 'settings-section');
+    updateSettingsUI();
+});
+
+document.getElementById('back-to-menu').addEventListener('click', () => {
+    toggleVisibility('generation-section', 'main-menu');
+});
+
+document.getElementById('back-from-settings').addEventListener('click', () => {
+    toggleVisibility('settings-section', 'main-menu');
+});
+
+document.getElementById('generate').addEventListener('click', async () => {
+    const count = document.getElementById('username-count').value;
+    if (!count || count < 1) return;
+    document.getElementById('generated-usernames').innerHTML = '';
+    for (let i = 0; i < count; i++) {
+        const username = generateUsername();
+        const status = await checkUsernameAvailability(username);
+        displayUsername(username, status);
     }
+});
+
+document.getElementById('toggle-taken-usernames').addEventListener('click', () => {
+    showTakenUsernames = !showTakenUsernames;
+    updateSettingsUI();
+});
+
+document.getElementById('filter-selection').addEventListener('change', (e) => {
+    generationFilter = parseInt(e.target.value);
+});
+
+function toggleVisibility(hideId, showId) {
+    document.getElementById(hideId).classList.add('hidden');
+    document.getElementById(showId).classList.remove('hidden');
 }
 
-// Function to generate a username based on the selected filter
-function generateUsernameByFilter() {
+function updateSettingsUI() {
+    document.getElementById('show-taken-status').innerText = showTakenUsernames ? 'On' : 'Off';
+}
+
+function generateUsername() {
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789_';
+    let username = '';
     switch (generationFilter) {
         case 1:
-            return generateRandomUsername(5);
-        case 2:
-            return generate6LetterUsername();
-        case 3:
-            return generate5SymbolsWith3Same();
-        case 4:
-            return generate6SymbolsWith3Or4Same();
-        case 5:
-            return generateThinName();
-        default:
-            return 'Invalid Filter';
-    }
-}
-
-// Random 5 Symbol generator
-function generateRandomUsername(length) {
-    const characters = 'abcdefghijklmnopqrstuvwxyz0123456789_';
-    let username = '';
-    for (let i = 0; i < length; i++) {
-        username += characters.charAt(Math.floor(Math.random() * characters.length));
-    }
-    return username;
-}
-
-// 6 Letters generator
-function generate6LetterUsername() {
-    const characters = 'abcdefghijklmnopqrstuvwxyz';
-    let username = '';
-    for (let i = 0; i < 6; i++) {
-        username += characters.charAt(Math.floor(Math.random() * characters.length));
-    }
-    return username;
-}
-
-// 5 Symbols with 3 Same
-function generate5SymbolsWith3Same() {
-    const characters = 'abcdefghijklmnopqrstuvwxyz0123456789_';
-    let char = characters.charAt(Math.floor(Math.random() * characters.length));
-    return char.repeat(3) + characters.charAt(Math.floor(Math.random() * characters.length)) + characters.charAt(Math.floor(Math.random() * characters.length));
-}
-
-// 6 Symbols with 3 or 4 Same
-function generate6SymbolsWith3Or4Same() {
-    const characters = 'abcdefghijklmnopqrstuvwxyz0123456789_';
-    let char = characters.charAt(Math.floor(Math.random() * characters.length));
-    let count = Math.floor(Math.random() * 2) + 3;
-    return char.repeat(count) + characters.charAt(Math.floor(Math.random() * characters.length));
-}
-
-// Thin Name generator
-function generateThinName() {
-    const thinChars = 'til1j';
-    let length = Math.floor(Math.random() * 2) + 5;
-    let username = '';
-    for (let i = 0; i < length; i++) {
-        username += thinChars.charAt(Math.floor(Math.random() * thinChars.length));
-    }
-    return username;
-}
-
-// Function to check username availability (placeholder)
-function checkUsername() {
-    let username = prompt('Enter a username to check:');
-    let output = document.getElementById('output');
-    output.innerHTML = 'Checking username...';
-    // Simulate checking the username
-    setTimeout(() => {
-        output.innerHTML = username + ' is available.';
-    }, 1000);
-}
-
-// Function to open the settings menu
-function openSettings() {
-    document.getElementById('settings').style.display = 'block';
-}
-
-// Function to close the settings menu
-function closeSettings() {
-    document.getElementById('settings').style.display = 'none';
-}
-
-// Function to change the filter in the settings menu
-function changeFilter(filterNumber) {
-    generationFilter = filterNumber;
-    let filterText = '';
-    switch (filterNumber) {
-        case 1:
-            filterText = 'Random 5 Symbol';
+            // Random 5 Symbols
+            username = randomChars(chars, 5);
             break;
         case 2:
-            filterText = '6 Letters';
+            // 6 Letters
+            username = randomChars('abcdefghijklmnopqrstuvwxyz', 6);
             break;
         case 3:
-            filterText = '5 Symbols with 3 Same';
+            // 5 Symbols with 3 Same
+            username = randomRepeat(5);
             break;
         case 4:
-            filterText = '6 Symbols with 3 or 4 Same';
+            // 6 Symbols with 3 or 4 Same
+            username = randomRepeat(6);
             break;
         case 5:
-            filterText = 'Thin Name';
+            // Thin Name
+            username = randomChars('til1j', randomInt(5, 6));
             break;
-        default:
-            filterText = 'Unknown Filter';
     }
-    document.getElementById('output').innerHTML = 'Selected filter: ' + filterText;
-    closeSettings();
+    return username;
+}
+
+function randomChars(chars, length) {
+    return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+}
+
+function randomRepeat(length) {
+    const char = randomChars('abcdefghijklmnopqrstuvwxyz0123456789_', 1);
+    return char.repeat(3) + randomChars('abcdefghijklmnopqrstuvwxyz0123456789_', length - 3);
+}
+
+function randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+async function checkUsernameAvailability(username) {
+    const response = await fetch(`https://auth.roblox.com/v1/usernames/validate?username=${username}&birthday=2006-09-21`);
+    const result = await response.json();
+    return result.code;
+}
+
+function displayUsername(username, status) {
+    const statusMessage = status === 0 ? 'Available' : 'Taken';
+    const statusColor = status === 0 ? 'green' : 'red';
+    const container = document.createElement('div');
+    container.innerHTML = `<span style="color: ${statusColor};">${username}: ${statusMessage}</span>`;
+    document.getElementById('generated-usernames').appendChild(container);
 }
