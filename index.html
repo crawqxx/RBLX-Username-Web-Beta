@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Username Tool</title>
+    <link rel="icon" type="image/png" href="https://cdn.discordapp.com/attachments/1256640765996699760/1281910718366613516/1798_oooo.plus.png?ex=66dd6fe4&is=66dc1e64&hm=0b34d6824daf64925df382780c86a4bd459fa4524d2a4bca8bb4e67012c82480&">
+    <link rel="icon" type="image/x-icon" href="https://cdn.discordapp.com/attachments/1256640765996699760/1281910966011035648/1798_oooo.plus.ico?ex=66dd701f&is=66dc1e9f&hm=257642806e295b89b920ce70d8c1213f86d9a20796072f2a126189197d9943a6&">
     <style>
         body {
             font-family: Consolas, monospace;
@@ -33,6 +35,9 @@
         .red { color: #ff0000; }
         .cyan { color: #00ffff; }
         .magenta { color: #ff00ff; }
+        .yellow { color: #ffff00; }
+        .blue { color: #0000ff; }
+        .white { color: #ffffff; }
     </style>
 </head>
 <body>
@@ -45,6 +50,7 @@
         let showTakenUsernames = true;
         let generationFilter = 1;
         let state = 'mainMenu';
+        let generatedUsernames = [];
 
         document.addEventListener('DOMContentLoaded', () => {
             showMainMenu();
@@ -77,7 +83,7 @@
         function showMainMenu() {
             clearOutput();
             printWatermark();
-            printToOutput('Main Menu:\n1) Generate Usernames\n2) Check Username\n3) Settings\nType the number to select an option.');
+            printToOutput('Main Menu:\n1) Generate Usernames\n2) Check Username\n3) Settings\n4) Exit\nType the number to select an option.');
             state = 'mainMenu';
         }
 
@@ -95,6 +101,9 @@
                     state = 'settings';
                     showSettingsPage();
                     break;
+                case '4':
+                    window.close(); // Close the tab
+                    break;
                 default:
                     printToOutput('Invalid option. Please enter a valid number.');
             }
@@ -104,6 +113,7 @@
             clearOutput();
             printWatermark();
             printToOutput('Generating Usernames:\nEnter how many usernames you want to generate (or press Enter to return):');
+            generatedUsernames = [];
         }
 
         async function handleGenerate(input) {
@@ -122,14 +132,12 @@
             printToOutput(`Generating ${number} usernames...`);
             for (let i = 0; i < number; i++) {
                 let username = generateUsernameByFilter();
-                if (!showTakenUsernames) {
-                    let isTaken = await checkUsernameStatus(username);
-                    if (isTaken) {
-                        printToOutput(`${username} - Account exists (taken), regenerating...`);
-                        username = generateUsernameByFilter();
-                    }
-                }
-                printToOutput(`Generated: ${username}`);
+                generatedUsernames.push(username);
+                printToOutput(username);
+            }
+            printToOutput(`\nGenerated ${number} usernames so far:`);
+            for (const username of generatedUsernames) {
+                printToOutput(username);
             }
         }
 
@@ -142,15 +150,7 @@
         async function handleUsernameChecker(input) {
             if (input !== '') {
                 const status = await checkUsernameStatus(input);
-                if (status === 'banned') {
-                    printToOutput(`${input} - Account is banned`);
-                } else if (status === true) {
-                    printToOutput(`${input} - Account exists (taken)`);
-                } else if (status === false) {
-                    printToOutput(`${input} - Account does not exist (available)`);
-                } else {
-                    printToOutput(`${input} - Unknown error`);
-                }
+                printToOutput(`${input} - ${status === true ? 'Account exists (taken)' : status === false ? 'Account does not exist (available)' : 'Unknown error'}`);
                 printToOutput('Press Enter to return to the username checker...');
                 state = 'usernameChecker';
             } else {
@@ -226,17 +226,17 @@
         }
 
         function printWatermark() {
+            const colors = ['magenta', 'cyan', 'yellow', 'blue', 'green'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
             const watermark = `
 ░█████╗░██████╗░░█████╗░░██╗░░░░░░░██╗░██████╗░██╗░░██╗██╗░░██╗
-██╔══██╗██╔══██╗██╔══██╗░██║░░██╗░░██║██╔═══██╗╚██╗██╔╝╚██╗██╔╝
-██║░░╚═╝██████╔╝███████║░╚██╗████╗██╔╝██║██╗██║░╚███╔╝░░╚███╔╝░
-██║░░██╗██╔══██╗██╔══██║░░████╔═████║░╚██████╔╝░██╔██╗░░██╔██╗░
-╚█████╔╝██║░░██║██║░░██║░░╚██╔╝░╚██╔╝░░╚═██╔═╝░██╔╝╚██╗██╔╝╚██╗
-░╚════╝░╚═╝░░╚═╝╚═╝░░╚═╝░░░╚═╝░░░╚═╝░░░░░╚═╝░░░╚═╝░░╚═╝╚═╝░░╚═╝
-
-                        RBLX-Username v1.1 Beta
+██╔══██╗██╔══██╗██╔══██╗░██║░░██╗░░██║██╔════╝░██║░░██║██║░░██║
+██║░░██║██████╔╝███████║░╚██╗████╗██╔╝██║░░██╗░███████║███████║
+██║░░██║██╔══██╗██╔══██║░░████╔██╗██║░██╗██║██║░░██║██║░░██║
+╚█████╔╝██║░░██║██║░░██║░░╚██╔╝╚██╔╝░╚█████╔╝██║░░██║██║░░██║
+░╚════╝░╚═╝░░╚═╝╚═╝░░╚═╝░░░╚═╝░░╚═╝░░░╚══╝░╚═╝░░╚═╝╚═╝░░╚═╝
             `;
-            printToOutput(watermark, 'magenta');
+            printToOutput(watermark, randomColor);
         }
 
         function generateUsernameByFilter() {
