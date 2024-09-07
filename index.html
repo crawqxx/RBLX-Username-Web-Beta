@@ -30,7 +30,6 @@
         .green { color: #00ff00; }
         .red { color: #ff0000; }
         .cyan { color: #00ffff; }
-        .magenta { color: #ff00ff; }
     </style>
 </head>
 <body>
@@ -56,73 +55,54 @@
         }
 
         async function executeCommand(command) {
-            switch(command) {
-                case '1':
-                    clearOutput();
-                    await generateUsernames(5);
-                    break;
-                case '2':
-                    clearOutput();
-                    await usernameChecker();
-                    break;
-                case '3':
-                    clearOutput();
-                    showSettingsMenu();
-                    break;
-                default:
-                    printToOutput('Unknown option. Please choose a valid number.');
+            if (command === '1') {
+                showWatermark();
+                await handleGeneration();
+            } else if (command === '2') {
+                await usernameChecker();
+            } else if (command === '3') {
+                showSettingsMenu();
+            } else if (command === '4') {
+                window.close();
+            } else {
+                printToOutput('Unknown command.');
             }
         }
 
-        function showMainMenu() {
-            clearOutput();
-            printToOutput(`░█████╗░██████╗░░█████╗░░██╗░░░░░░░██╗░██████╗░██╗░░██╗██╗░░██╗
+        function showWatermark() {
+            printToOutput(`
+    ░█████╗░██████╗░░█████╗░░██╗░░░░░░░██╗░██████╗░██╗░░██╗██╗░░██╗
     ██╔══██╗██╔══██╗██╔══██╗░██║░░██╗░░██║██╔═══██╗╚██╗██╔╝╚██╗██╔╝
     ██║░░╚═╝██████╔╝███████║░╚██╗████╗██╔╝██║██╗██║░╚███╔╝░░╚███╔╝░
     ██║░░██╗██╔══██╗██╔══██║░░████╔═████║░╚██████╔╝░██╔██╗░░██╔██╗░
     ╚█████╔╝██║░░██║██║░░██║░░╚██╔╝░╚██╔╝░░╚═██╔═╝░██╔╝╚██╗██╔╝╚██╗
     ░╚════╝░╚═╝░░╚═╝╚═╝░░╚═╝░░░╚═╝░░░╚═╝░░░░░╚═╝░░░╚═╝░░╚═╝╚═╝░░╚═╝
-              
-                            RBLX-Username v1.1 Beta
-            \nMain Menu:\n1) Generate Usernames\n2) Check Username\n3) Settings`);
+          
+                        RBLX-Username v1.1 Beta
+            `);
         }
 
-        function showSettingsMenu() {
-            printToOutput(`Settings Menu:\n1) Toggle Show Taken Usernames\n2) Set Filter\n3) Back to Main Menu\nType the number to select an option.`);
-        }
+        async function handleGeneration() {
+            printToOutput('Enter how many usernames you want to generate (or press Enter to return):');
+            inputField.focus();
 
-        function updateSettings(command) {
-            if (command === '1') {
-                showTakenUsernames = !showTakenUsernames;
-                printToOutput(`Show taken usernames: ${showTakenUsernames ? 'On' : 'Off'}`);
-            } else if (command === '2') {
-                const filterNumber = parseInt(prompt('Enter filter number (1-5):'));
-                if (filterNumber >= 1 && filterNumber <= 5) {
-                    generationFilter = filterNumber;
-                    printToOutput(`Filter set to: ${generationFilter}`);
-                } else {
-                    printToOutput('Invalid filter number.');
-                }
-            } else if (command === '3') {
-                showMainMenu();
-            } else {
-                printToOutput('Invalid settings command.');
-            }
-        }
-
-        async function generateUsernames(number) {
-            printToOutput(`Generating ${number} usernames...`);
-            for (let i = 0; i < number; i++) {
-                let username = generateUsernameByFilter();
-                if (!showTakenUsernames) {
-                    let isTaken = await checkUsernameStatus(username);
-                    if (isTaken) {
-                        printToOutput(`${username} - Account exists (taken), regenerating...`);
-                        username = generateUsernameByFilter();
+            const number = await getNumberInput();
+            if (number !== null) {
+                clearOutput();
+                printToOutput(`Generating ${number} usernames...`);
+                for (let i = 0; i < number; i++) {
+                    let username = generateUsernameByFilter();
+                    if (!showTakenUsernames) {
+                        let isTaken = await checkUsernameStatus(username);
+                        if (isTaken) {
+                            printToOutput(`${username} - Account exists (taken), regenerating...`);
+                            username = generateUsernameByFilter();
+                        }
                     }
+                    printToOutput(`Generated: ${username}`);
+                    generatedUsernamesCount++;
                 }
-                printToOutput(`Generated: ${username}`);
-                generatedUsernamesCount++;
+                printToOutput('Press Enter to Return to generation page');
             }
         }
 
@@ -143,105 +123,123 @@
             }
         }
 
-        function generateRandomUsername(length) {
-            const characters = 'abcdefghijklmnopqrstuvwxyz0123456789_';
-            let username = '';
-            for (let i = 0; i < length; i++) {
-                username += characters.charAt(Math.floor(Math.random() * characters.length));
-            }
-            return username;
-        }
-
-        function generate6LetterUsername() {
-            const characters = 'abcdefghijklmnopqrstuvwxyz';
-            let username = '';
-            for (let i = 0; i < 6; i++) {
-                username += characters.charAt(Math.floor(Math.random() * characters.length));
-            }
-            return username;
-        }
-
-        function generate5SymbolsWith3Same() {
-            const characters = 'abcdefghijklmnopqrstuvwxyz0123456789_';
-            let username = '';
-            const char = characters.charAt(Math.floor(Math.random() * characters.length));
-            for (let i = 0; i < 3; i++) {
-                username += char;
-            }
-            for (let i = 3; i < 5; i++) {
-                username += characters.charAt(Math.floor(Math.random() * characters.length));
-            }
-            return shuffleString(username);
-        }
-
-        function generate6SymbolsWith3Or4Same() {
-            const characters = 'abcdefghijklmnopqrstuvwxyz0123456789_';
-            let username = '';
-            const char = characters.charAt(Math.floor(Math.random() * characters.length));
-            const count = Math.random() > 0.5 ? 3 : 4;
-            for (let i = 0; i < count; i++) {
-                username += char;
-            }
-            for (let i = count; i < 6; i++) {
-                username += characters.charAt(Math.floor(Math.random() * characters.length));
-            }
-            return shuffleString(username);
-        }
-
-        function generateThinName() {
-            const thinChars = 'til1j';
-            const length = Math.random() > 0.5 ? 5 : 6;
-            let username = '';
-            for (let i = 0; i < length; i++) {
-                username += thinChars.charAt(Math.floor(Math.random() * thinChars.length));
-            }
-            return username;
-        }
-
-        function shuffleString(str) {
-            const arr = str.split('');
-            for (let i = arr.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [arr[i], arr[j]] = [arr[j], arr[i]];
-            }
-            return arr.join('');
-        }
-
-        async function checkUsernameStatus(username) {
-            const url1 = `https://www.roblox.com/users/profile?username=${username}`;
-            const url2 = `https://auth.roblox.com/v1/usernames/validate?birthday=2006-09-21T07:00:00.000Z&context=Signup&username=${username}`;
-
-            try {
-                const response = await fetch(url1);
-                if (response.ok) {
-                    return true;
-                }
-                const jsonResponse = await fetch(url2);
-                const data = await jsonResponse.json();
-                return data.status === 403;
-            } catch (error) {
-                printToOutput(`Error checking username status: ${error.message}`);
-                return false;
-            }
+        async function getNumberInput() {
+            return new Promise((resolve) => {
+                const handleInput = (event) => {
+                    if (event.key === 'Enter') {
+                        const value = parseInt(inputField.value.trim());
+                        if (!isNaN(value) && value > 0) {
+                            resolve(value);
+                        } else {
+                            resolve(null);
+                        }
+                        inputField.removeEventListener('keypress', handleInput);
+                    }
+                };
+                inputField.addEventListener('keypress', handleInput);
+            });
         }
 
         async function usernameChecker() {
-            const username = prompt('Enter username to check:');
-            if (username.length < 3 || username.length > 20) {
-                printToOutput('Username must be between 3 and 20 characters.');
-                return;
-            }
-            const isTaken = await checkUsernameStatus(username);
-            if (isTaken) {
-                printToOutput(`${username} - Taken`, 'red');
-            } else {
-                printToOutput(`${username} - Available`, 'green');
+            printToOutput('Enter a username to check (or press Enter to return):');
+            inputField.focus();
+
+            const username = await getTextInput();
+            if (username !== null) {
+                clearOutput();
+                const status = await checkUsernameStatus(username);
+                if (status === 'banned') {
+                    printToOutput(`${username} - Account is banned`, 'red');
+                } else if (status === true) {
+                    printToOutput(`${username} - Account exists (taken)`, 'red');
+                } else if (status === false) {
+                    printToOutput(`${username} - Account does not exist (available)`, 'green');
+                } else if (status === 2) {
+                    printToOutput(`${username} - Username is inappropriate for Roblox`, 'red');
+                } else if (status === 3) {
+                    printToOutput(`${username} - Username must be 3 to 20 characters long.`, 'red');
+                } else if (status === 4) {
+                    printToOutput(`${username} - Username cannot start or end with _`, 'red');
+                } else if (status === 7) {
+                    printToOutput(`${username} - Only a-z, A-Z, 0-9, and _ are allowed`, 'red');
+                } else {
+                    printToOutput(`${username} - Unknown error`, 'red');
+                }
+                printToOutput('Press Enter to return to the username checker...');
             }
         }
 
-        function printToOutput(message, color = 'cyan') {
-            const watermark = 'Watermark: RBLX-Username v1.1 Beta\n';
-            outputDiv.innerHTML += `${watermark}${message}\n`;
+        async function getTextInput() {
+            return new Promise((resolve) => {
+                const handleInput = (event) => {
+                    if (event.key === 'Enter') {
+                        const value = inputField.value.trim();
+                        resolve(value.length > 0 ? value : null);
+                        inputField.removeEventListener('keypress', handleInput);
+                    }
+                };
+                inputField.addEventListener('keypress', handleInput);
+            });
+        }
+
+        function showSettingsMenu() {
+            clearOutput();
+            printToOutput(`Settings Menu:
+1) Toggle showing taken usernames (current: ${showTakenUsernames ? 'On' : 'Off'})
+2) Filters (current: ${getFilterName()})
+Select an option (or press Enter to return):`);
+            inputField.focus();
+        }
+
+        function getFilterName() {
+            switch (generationFilter) {
+                case 1: return 'Random 5 Symbol (default)';
+                case 2: return '6 Letters';
+                case 3: return '5 Symbols with 3 Same Symbols';
+                case 4: return '6 Symbols with 3 or 4 Same Symbols';
+                case 5: return 'Thin Name';
+                default: return 'Unknown';
+            }
+        }
+
+        function updateSettings(command) {
+            if (command === '1') {
+                showTakenUsernames = !showTakenUsernames;
+                printToOutput(`Show taken usernames: ${showTakenUsernames ? 'On' : 'Off'}`);
+            } else if (command === '2') {
+                showFilterSelection();
+            } else {
+                printToOutput('Invalid settings command.');
+            }
+        }
+
+        function showFilterSelection() {
+            clearOutput();
+            printToOutput(`Select a filter:
+1) Random 5 Symbol (default)
+2) 6 Letters
+3) 5 Symbols with 3 Same Symbols
+4) 6 Symbols with 3 or 4 Same Symbols
+5) Thin Name (5-6 symbols using only 't, i, l, 1, j')
+Enter your choice (1-5):`);
+            inputField.focus();
+        }
+
+        async function handleFilterSelection() {
+            const filterChoice = await getNumberInput();
+            if (filterChoice >= 1 && filterChoice <= 5) {
+                generationFilter = filterChoice;
+                printToOutput(`Filter set to: ${getFilterName()}`);
+            } else {
+                printToOutput('Invalid filter choice.');
+            }
+        }
+
+        function printToOutput(text, color = 'cyan') {
+            const p = document.createElement('p');
+            p.textContent = text;
+            p.className = color;
+            outputDiv.appendChild(p);
             outputDiv.scrollTop = outputDiv.scrollHeight;
         }
 
