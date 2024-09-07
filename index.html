@@ -19,6 +19,8 @@
             height: 300px;
             overflow-y: auto;
             border: 1px solid #333;
+            resize: vertical;
+            overflow: auto;
         }
         input {
             font-family: Consolas, monospace;
@@ -97,7 +99,7 @@
                     window.close();
                     break;
                 default:
-                    printToOutput('Invalid option. Please select a valid number.');
+                    reloadPage();
             }
         }
 
@@ -115,7 +117,7 @@
             } else if (input === '') {
                 showMainMenu();
             } else {
-                printToOutput('Invalid number. Please enter a positive number.');
+                reloadPage();
             }
         }
 
@@ -181,7 +183,7 @@
                     window.close();
                     break;
                 default:
-                    printToOutput('Invalid option. Please select a valid number.');
+                    reloadPage();
             }
         }
 
@@ -197,14 +199,12 @@
                 generationFilter = filterChoice;
                 printToOutput(`Filter set to: ${getFilterName()}`);
             } else {
-                printToOutput('Invalid filter choice.');
+                reloadPage();
             }
         }
 
         function getFilterName() {
             switch (generationFilter) {
-                case 1:
-                    return 'Random 5 Symbol';
                 case 2:
                     return '6 Letters';
                 case 3:
@@ -213,12 +213,13 @@
                     return '6 Symbols with 3 or 4 Same Symbols';
                 case 5:
                     return 'Thin Name';
+                case 1:
                 default:
                     return 'Random 5 Symbol';
             }
         }
 
-        function printToOutput(text, color = 'cyan') {
+        function printToOutput(text, color = 'white') {
             const p = document.createElement('p');
             p.textContent = text;
             p.className = color;
@@ -241,17 +242,93 @@
 
                         RBLX-Username v1.1 Beta
             `;
-            printToOutput(watermark, 'cyan');
+            printToOutput(watermark, 'magenta');
         }
 
         function generateUsernameByFilter() {
-            // Placeholder function for generating usernames based on the selected filter
-            return 'username' + Math.floor(Math.random() * 10000);
+            switch (generationFilter) {
+                case 2:
+                    return generate6LetterUsername();
+                case 3:
+                    return generate5SymbolsWith3Same();
+                case 4:
+                    return generate6SymbolsWith3or4Same();
+                case 5:
+                    return generateThinName();
+                case 1:
+                default:
+                    return generateRandom5Symbol();
+            }
+        }
+
+        function generateRandom5Symbol() {
+            const symbols = 'abcdefghijklmnopqrstuvwxyz0123456789';
+            let username = '';
+            for (let i = 0; i < 5; i++) {
+                username += symbols.charAt(Math.floor(Math.random() * symbols.length));
+            }
+            return username;
+        }
+
+        function generate6LetterUsername() {
+            const symbols = 'abcdefghijklmnopqrstuvwxyz';
+            let username = '';
+            for (let i = 0; i < 6; i++) {
+                username += symbols.charAt(Math.floor(Math.random() * symbols.length));
+            }
+            return username;
+        }
+
+        function generate5SymbolsWith3Same() {
+            const symbols = 'abcdefghijklmnopqrstuvwxyz0123456789';
+            const base = symbols.charAt(Math.floor(Math.random() * symbols.length));
+            let username = base.repeat(3);
+            while (username.length < 5) {
+                username += symbols.charAt(Math.floor(Math.random() * symbols.length));
+            }
+            return username;
+        }
+
+        function generate6SymbolsWith3or4Same() {
+            const symbols = 'abcdefghijklmnopqrstuvwxyz0123456789';
+            let username = '';
+            const base = symbols.charAt(Math.floor(Math.random() * symbols.length));
+            const repeatCount = Math.random() > 0.5 ? 3 : 4;
+            username = base.repeat(repeatCount);
+            while (username.length < 6) {
+                username += symbols.charAt(Math.floor(Math.random() * symbols.length));
+            }
+            return username;
+        }
+
+        function generateThinName() {
+            const symbols = 'til1j';
+            let username = '';
+            for (let i = 0; i < 5; i++) {
+                username += symbols.charAt(Math.floor(Math.random() * symbols.length));
+            }
+            return username;
         }
 
         async function checkUsernameStatus(username) {
-            // Placeholder function for checking username status
-            return Math.random() > 0.5;
+            try {
+                const response = await fetch(`https://auth.roblox.com/v1/usernames/validate?birthday=2006-09-21T07:00:00.000Z&context=Signup&username=${username}`);
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.errors && result.errors.includes('Username is already taken')) {
+                        return true;
+                    }
+                    return false;
+                } else {
+                    return 'banned';
+                }
+            } catch (error) {
+                return 'error';
+            }
+        }
+
+        function reloadPage() {
+            location.reload();
         }
     </script>
 </body>
