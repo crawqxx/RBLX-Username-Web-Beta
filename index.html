@@ -3,321 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Username Tool</title>
-    <link rel="icon" type="image/png" href="https://cdn.discordapp.com/attachments/1256640765996699760/1281910718366613516/1798_oooo.plus.png?ex=66dd6fe4&is=66dc1e64&hm=0b34d6824daf64925df382780c86a4bd459fa4524d2a4bca8bb4e67012c82480&">
-    <link rel="icon" type="image/x-icon" href="https://cdn.discordapp.com/attachments/1256640765996699760/1281910966011035648/1798_oooo.plus.ico?ex=66dd701f&is=66dc1e9f&hm=257642806e295b89b920ce70d8c1213f86d9a20796072f2a126189197d9943a6&">
-    <style>
-        body {
-            font-family: Consolas, monospace;
-            background-color: #0c0c0c;
-            color: #ffffff;
-            padding: 20px;
-        }
-        #output {
-            white-space: pre;
-            background-color: #0c0c0c;
-            padding: 10px;
-            margin-bottom: 10px;
-            height: 300px;
-            overflow-y: auto;
-            border: 1px solid #333;
-            resize: vertical;
-            overflow: auto;
-        }
-        input {
-            font-family: Consolas, monospace;
-            margin: 5px 0;
-            background-color: #1e1e1e;
-            color: #ffffff;
-            border: 1px solid #333;
-        }
-        .green { color: #00ff00; }
-        .red { color: #ff0000; }
-        .cyan { color: #00ffff; }
-        .magenta { color: #ff00ff; }
-        .yellow { color: #ffff00; }
-        .blue { color: #0000ff; }
-        .white { color: #ffffff; }
-    </style>
+    <title>RBLX Username Generator</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="output"></div>
-    <input type="text" id="input" placeholder="Enter command..." />
+    <div class="container">
+        <h1>RBLX Username Generator</h1>
+        <div id="watermark">
+            ░█████╗░██████╗░░█████╗░░██╗░░░░░░░██╗░██████╗░██╗░░██╗██╗░░██╗
+            ██╔══██╗██╔══██╗██╔══██╗░██║░░██╗░░██║██╔═══██╗╚██╗██╔╝╚██╗██╔╝
+            ██║░░╚═╝██████╔╝███████║░╚██╗████╗██╔╝██║██╗██║░╚███╔╝░░╚███╔╝░
+            ██║░░██╗██╔══██╗██╔══██║░░████╔═████║░╚██████╔╝░██╔██╗░░██╔██╗░
+            ╚█████╔╝██║░░██║██║░░██║░░╚██╔╝░╚██╔╝░░╚═██╔═╝░██╔╝╚██╗██╔╝╚██╗
+            ░╚════╝░╚═╝░░╚═╝╚═╝░░╚═╝░░░╚═╝░░░╚═╝░░░░░╚═╝░░░╚═╝░░╚═╝╚═╝░░╚═╝
+        </div>
+        <h2>RBLX-Username v1.1 Beta</h2>
+        <hr>
 
-    <script>
-        const outputDiv = document.getElementById('output');
-        const inputField = document.getElementById('input');
-        let showTakenUsernames = true;
-        let generationFilter = 1;
-        let state = 'mainMenu';
-        let generatedUsernames = [];
+        <!-- Menu Options -->
+        <div class="menu">
+            <button onclick="generateUsernames()">Generate Usernames</button>
+            <button onclick="checkUsername()">Check Username</button>
+            <button onclick="openSettings()">Settings</button>
+        </div>
 
-        document.addEventListener('DOMContentLoaded', () => {
-            showMainMenu();
-        });
+        <div id="output"></div>
 
-        inputField.addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') {
-                handleInput(inputField.value.trim());
-                inputField.value = '';
-            }
-        });
+        <!-- Settings Section -->
+        <div id="settings" style="display: none;">
+            <h3>Settings Menu</h3>
+            <p>1) Toggle showing taken usernames (current: <span id="showTakenUsernames">On</span>)</p>
+            <p>2) Filters (current: Random 5 Symbol)</p>
+            <button onclick="changeFilter(1)">1) Random 5 Symbol</button>
+            <button onclick="changeFilter(2)">2) 6 Letters</button>
+            <button onclick="changeFilter(3)">3) 5 Symbols with 3 Same</button>
+            <button onclick="changeFilter(4)">4) 6 Symbols with 3 or 4 Same</button>
+            <button onclick="changeFilter(5)">5) Thin Name</button>
+            <button onclick="closeSettings()">Close Settings</button>
+        </div>
+    </div>
 
-        function handleInput(input) {
-            switch (state) {
-                case 'mainMenu':
-                    handleMainMenu(input);
-                    break;
-                case 'generate':
-                    handleGenerate(input);
-                    break;
-                case 'usernameChecker':
-                    handleUsernameChecker(input);
-                    break;
-                case 'settings':
-                    handleSettings(input);
-                    break;
-            }
-        }
-
-        function showMainMenu() {
-            clearOutput();
-            printWatermark();
-            printToOutput('Main Menu:\n1) Generate Usernames\n2) Check Username\n3) Settings\n4) Exit\nType the number to select an option.');
-            state = 'mainMenu';
-        }
-
-        function handleMainMenu(input) {
-            switch (input) {
-                case '1':
-                    state = 'generate';
-                    showGeneratePage();
-                    break;
-                case '2':
-                    state = 'usernameChecker';
-                    showUsernameCheckerPage();
-                    break;
-                case '3':
-                    state = 'settings';
-                    showSettingsPage();
-                    break;
-                case '4':
-                    window.close(); // Close the tab
-                    break;
-                default:
-                    printToOutput('Invalid option. Please enter a valid number.');
-            }
-        }
-
-        function showGeneratePage() {
-            clearOutput();
-            printWatermark();
-            printToOutput('Enter how many usernames you want to generate (or press Enter to return):');
-            generatedUsernames = [];
-        }
-
-        async function handleGenerate(input) {
-            if (!isNaN(input) && input > 0) {
-                await generateUsernames(parseInt(input));
-                printToOutput('Press Enter to Return to the generation page.');
-                state = 'generate';
-            } else if (input === '') {
-                showMainMenu();
-            } else {
-                printToOutput('Invalid input. Please enter a valid number.');
-            }
-        }
-
-        async function generateUsernames(number) {
-            printToOutput(`Generating ${number} usernames...`);
-            for (let i = 0; i < number; i++) {
-                let username = generateUsernameByFilter();
-                generatedUsernames.push(username);
-            }
-            printToOutput(`Generated ${number} usernames so far:`);
-            printToOutput(generatedUsernames.join(' '));
-        }
-
-        function showUsernameCheckerPage() {
-            clearOutput();
-            printWatermark();
-            printToOutput('Username Checker:\nEnter a username to check (or press Enter to return):');
-        }
-
-        async function handleUsernameChecker(input) {
-            if (input !== '') {
-                const status = await checkUsernameStatus(input);
-                printToOutput(`${input} - ${status === true ? 'Account exists (taken)' : status === false ? 'Account does not exist (available)' : 'Unknown error'}`);
-                printToOutput('Press Enter to return to the username checker...');
-                state = 'usernameChecker';
-            } else {
-                showMainMenu();
-            }
-        }
-
-        function showSettingsPage() {
-            clearOutput();
-            printWatermark();
-            printToOutput('Settings Menu:\n1) Toggle showing taken usernames (current: ' + (showTakenUsernames ? 'On' : 'Off') + ')\n2) Filters (current: ' + getFilterName() + ')\nSelect an option (or press Enter to return):');
-        }
-
-        function handleSettings(input) {
-            switch (input) {
-                case '1':
-                    showTakenUsernames = !showTakenUsernames;
-                    showSettingsPage(); // Refresh the settings page
-                    break;
-                case '2':
-                    showFilterOptions();
-                    break;
-                case '':
-                    showMainMenu();
-                    break;
-                default:
-                    printToOutput('Invalid option. Please enter a valid number.');
-            }
-        }
-
-        function showFilterOptions() {
-            clearOutput();
-            printWatermark();
-            printToOutput('Select a filter:\n1) Random 5 Symbol (default)\n2) 6 Letters\n3) 5 Symbols with 3 Same Symbols\n4) 6 Symbols with 3 or 4 Same Symbols\n5) Thin Name (5-6 symbols using only t, i, l, 1, j)\nEnter your choice (1-5):');
-        }
-
-        function handleFilterChoice(input) {
-            const filterChoice = parseInt(input);
-            if (filterChoice >= 1 && filterChoice <= 5) {
-                generationFilter = filterChoice;
-                showSettingsPage(); // Refresh the settings page
-            } else {
-                printToOutput('Invalid filter choice. Please enter a number between 1 and 5.');
-            }
-        }
-
-        function getFilterName() {
-            switch (generationFilter) {
-                case 2:
-                    return '6 Letters';
-                case 3:
-                    return '5 Symbols with 3 Same Symbols';
-                case 4:
-                    return '6 Symbols with 3 or 4 Same Symbols';
-                case 5:
-                    return 'Thin Name';
-                case 1:
-                default:
-                    return 'Random 5 Symbol';
-            }
-        }
-
-        function printToOutput(text, color = 'white') {
-            const p = document.createElement('p');
-            p.textContent = text;
-            p.className = color;
-            outputDiv.appendChild(p);
-            outputDiv.scrollTop = outputDiv.scrollHeight;
-        }
-
-        function clearOutput() {
-            outputDiv.innerHTML = '';
-        }
-
-        function printWatermark() {
-            const colors = ['magenta', 'cyan', 'yellow', 'blue', 'green'];
-            const randomColor = colors[Math.floor(Math.random() * colors.length)];
-            const watermark = `
-░█████╗░██████╗░░█████╗░░██╗░░░░░░░██╗░██████╗░██╗░░██╗██╗░░██╗
-██╔══██╗██╔══██╗██╔══██╗░██║░░██╗░░██║██╔═══██╗╚██╗██╔╝╚██╗██╔╝
-██║░░╚═╝██████╔╝███████║░╚██╗████╗██╔╝██║██╗██║░╚███╔╝░░╚███╔╝░
-██║░░██╗██╔══██╗██╔══██║░░████╔═████║░╚██████╔╝░██╔██╗░░██╔██╗░
-╚█████╔╝██║░░██║██║░░██║░░╚██╔╝░╚██╔╝░░╚═██╔═╝░██╔╝╚██╗██╔╝╚██╗
-░╚════╝░╚═╝░░╚═╝╚═╝░░╚═╝░░░╚═╝░░░╚═╝░░░░░╚═╝░░░╚═╝░░╚═╝╚═╝░░╚═╝
-                RBLX-Username v1.1 Beta
-            `;
-            printToOutput(watermark, randomColor);
-        }
-
-        function generateUsernameByFilter() {
-            switch (generationFilter) {
-                case 2:
-                    return generate6LetterUsername();
-                case 3:
-                    return generate5SymbolsWith3Same();
-                case 4:
-                    return generate6SymbolsWith3or4Same();
-                case 5:
-                    return generateThinName();
-                case 1:
-                default:
-                    return generateRandom5Symbol();
-            }
-        }
-
-        function generateRandom5Symbol() {
-            const symbols = 'abcdefghijklmnopqrstuvwxyz0123456789';
-            let username = '';
-            for (let i = 0; i < 5; i++) {
-                username += symbols.charAt(Math.floor(Math.random() * symbols.length));
-            }
-            return username;
-        }
-
-        function generate6LetterUsername() {
-            const symbols = 'abcdefghijklmnopqrstuvwxyz';
-            let username = '';
-            for (let i = 0; i < 6; i++) {
-                username += symbols.charAt(Math.floor(Math.random() * symbols.length));
-            }
-            return username;
-        }
-
-        function generate5SymbolsWith3Same() {
-            const symbols = 'abcdefghijklmnopqrstuvwxyz0123456789';
-            const base = symbols.charAt(Math.floor(Math.random() * symbols.length));
-            let username = base.repeat(3);
-            while (username.length < 5) {
-                username += symbols.charAt(Math.floor(Math.random() * symbols.length));
-            }
-            return username;
-        }
-
-        function generate6SymbolsWith3or4Same() {
-            const symbols = 'abcdefghijklmnopqrstuvwxyz0123456789';
-            let username = '';
-            const base = symbols.charAt(Math.floor(Math.random() * symbols.length));
-            const repeatCount = Math.random() > 0.5 ? 3 : 4;
-            username = base.repeat(repeatCount);
-            while (username.length < 6) {
-                username += symbols.charAt(Math.floor(Math.random() * symbols.length));
-            }
-            return username;
-        }
-
-        function generateThinName() {
-            const symbols = 'til1j';
-            let username = '';
-            for (let i = 0; i < 5; i++) {
-                username += symbols.charAt(Math.floor(Math.random() * symbols.length));
-            }
-            return username;
-        }
-
-        async function checkUsernameStatus(username) {
-            try {
-                const response = await fetch(`https://auth.roblox.com/v1/usernames/validate?birthday=2006-09-21T07:00:00.000Z&context=Signup&username=${username}`);
-                if (response.ok) {
-                    const result = await response.json();
-                    if (result.errors && result.errors.includes('Username is already taken')) {
-                        return true;
-                    }
-                    return false;
-                } else {
-                    return 'banned';
-                }
-            } catch (error) {
-                return 'error';
-            }
-        }
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
