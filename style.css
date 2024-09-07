@@ -1,13 +1,13 @@
-/* Dark theme with monospace font */
+/* Terminal-like dark theme with monospace font */
 body {
     font-family: 'Courier New', monospace;
-    background-color: #1e1e1e;
-    color: #ffffff;
+    background-color: #000;
+    color: #fff;
     text-align: center;
 }
 
 .container {
-    max-width: 900px; /* Increased width to fit watermark */
+    max-width: 600px; /* Adjusted width */
     margin: 0 auto;
     padding: 20px;
 }
@@ -17,20 +17,22 @@ body {
 }
 
 h1, h2 {
-    color: #1abc9c;
+    color: #1abc9c; /* Terminal-style green headers */
 }
 
 button {
     padding: 10px 20px;
-    background-color: #2980b9;
+    background-color: #555; /* Terminal-like grey */
     border: none;
     color: white;
     margin: 10px;
     cursor: pointer;
+    border-radius: 8px; /* Rounded corners */
+    font-family: 'Courier New', monospace; /* Monospace font for buttons */
 }
 
 button:hover {
-    background-color: #3498db;
+    background-color: #777; /* Lighter grey on hover */
 }
 
 #generated-usernames {
@@ -40,5 +42,7 @@ button:hover {
 #watermark {
     margin-bottom: 20px;
     color: #95a5a6;
-    white-space: pre-wrap; /* Prevent text overflow and ensure proper formatting */
+    white-space: pre-wrap; /* Ensure watermark formatting */
+    font-size: 10px; /* Smaller font to fit more horizontally */
+    line-height: 0.9; /* Reduced line height to condense watermark */
 }
