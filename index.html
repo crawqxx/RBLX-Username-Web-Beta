@@ -45,7 +45,7 @@
         let generatedUsernamesCount = 0;
 
         document.addEventListener('DOMContentLoaded', () => {
-            printToOutput('RBLX-Username v1.1 Beta\nType "menu" to get started.');
+            showMainMenu();
         });
 
         function handleKeyPress(event) {
@@ -56,37 +56,55 @@
         }
 
         async function executeCommand(command) {
-            if (command === 'menu') {
-                showMainMenu();
-            } else if (command === 'generate') {
-                await generateUsernames(5);
-            } else if (command === 'check') {
-                await usernameChecker();
-            } else if (command.startsWith('settings')) {
-                updateSettings(command);
-            } else if (command.startsWith('create')) {
-                await createAccount(command.split(' ')[1]);
-            } else {
-                printToOutput('Unknown command.');
+            switch(command) {
+                case '1':
+                    clearOutput();
+                    await generateUsernames(5);
+                    break;
+                case '2':
+                    clearOutput();
+                    await usernameChecker();
+                    break;
+                case '3':
+                    clearOutput();
+                    showSettingsMenu();
+                    break;
+                default:
+                    printToOutput('Unknown option. Please choose a valid number.');
             }
         }
 
         function showMainMenu() {
-            printToOutput('Main Menu:\n1) Generate Usernames\n2) Check Username\n3) Settings\n4) Create Account\nType the number to select an option.');
+            clearOutput();
+            printToOutput(`░█████╗░██████╗░░█████╗░░██╗░░░░░░░██╗░██████╗░██╗░░██╗██╗░░██╗
+    ██╔══██╗██╔══██╗██╔══██╗░██║░░██╗░░██║██╔═══██╗╚██╗██╔╝╚██╗██╔╝
+    ██║░░╚═╝██████╔╝███████║░╚██╗████╗██╔╝██║██╗██║░╚███╔╝░░╚███╔╝░
+    ██║░░██╗██╔══██╗██╔══██║░░████╔═████║░╚██████╔╝░██╔██╗░░██╔██╗░
+    ╚█████╔╝██║░░██║██║░░██║░░╚██╔╝░╚██╔╝░░╚═██╔═╝░██╔╝╚██╗██╔╝╚██╗
+    ░╚════╝░╚═╝░░╚═╝╚═╝░░╚═╝░░░╚═╝░░░╚═╝░░░░░╚═╝░░░╚═╝░░╚═╝╚═╝░░╚═╝
+              
+                            RBLX-Username v1.1 Beta
+            \nMain Menu:\n1) Generate Usernames\n2) Check Username\n3) Settings`);
+        }
+
+        function showSettingsMenu() {
+            printToOutput(`Settings Menu:\n1) Toggle Show Taken Usernames\n2) Set Filter\n3) Back to Main Menu\nType the number to select an option.`);
         }
 
         function updateSettings(command) {
-            if (command === 'settings toggle') {
+            if (command === '1') {
                 showTakenUsernames = !showTakenUsernames;
                 printToOutput(`Show taken usernames: ${showTakenUsernames ? 'On' : 'Off'}`);
-            } else if (command.startsWith('settings filter')) {
-                const filterNumber = parseInt(command.split(' ')[2]);
+            } else if (command === '2') {
+                const filterNumber = parseInt(prompt('Enter filter number (1-5):'));
                 if (filterNumber >= 1 && filterNumber <= 5) {
                     generationFilter = filterNumber;
                     printToOutput(`Filter set to: ${generationFilter}`);
                 } else {
                     printToOutput('Invalid filter number.');
                 }
+            } else if (command === '3') {
+                showMainMenu();
             } else {
                 printToOutput('Invalid settings command.');
             }
@@ -192,71 +210,43 @@
         async function checkUsernameStatus(username) {
             const url1 = `https://www.roblox.com/users/profile?username=${username}`;
             const url2 = `https://auth.roblox.com/v1/usernames/validate?birthday=2006-09-21T07:00:00.000Z&context=Signup&username=${username}`;
+
             try {
-                let response = await fetch(url1);
-                if (response.status === 200) {
-                    const pageContent = await response.text();
-                    if (pageContent.toLowerCase().includes('banned')) {
-                        return 'banned';
-                    }
+                const response = await fetch(url1);
+                if (response.ok) {
                     return true;
                 }
-                response = await fetch(url2);
-                if (response.status === 200) {
-                    const validationData = await response.json();
-                    if (validationData.code === 0) {
-                        return false;
-                    } else if (validationData.code === 1) {
-                        return true;
-                    } else {
-                        return validationData.code;
-                    }
-                }
-                return false;
+                const jsonResponse = await fetch(url2);
+                const data = await jsonResponse.json();
+                return data.status === 403;
             } catch (error) {
-                printToOutput(`${username} - ${error.message}`);
-                return null;
+                printToOutput(`Error checking username status: ${error.message}`);
+                return false;
             }
         }
 
         async function usernameChecker() {
             const username = prompt('Enter username to check:');
-            if (username) {
-                const status = await checkUsernameStatus(username);
-                if (status === 'banned') {
-                    printToOutput(`${username} - Account is banned`);
-                } else if (status === true) {
-                    printToOutput(`${username} - Account exists (taken)`);
-                } else if (status === false) {
-                    printToOutput(`${username} - Account does not exist (available)`);
-                } else if (status === 2) {
-                    printToOutput(`${username} - Username is inappropriate for Roblox`);
-                } else if (status === 3) {
-                    printToOutput(`${username} - Username must be 3 to 20 characters long.`);
-                } else if (status === 4) {
-                    printToOutput(`${username} - Username cannot start or end with _`);
-                } else if (status === 7) {
-                    printToOutput(`${username} - Only a-z, A-Z, 0-9, and _ are allowed`);
-                } else {
-                    printToOutput(`${username} - Unknown error`);
-                }
+            if (username.length < 3 || username.length > 20) {
+                printToOutput('Username must be between 3 and 20 characters.');
+                return;
             }
-        }
-
-        async function createAccount(username) {
-            const result = await checkUsernameStatus(username);
-            if (result === false) {
-                printToOutput(`Creating account for ${username}...`);
-                // Add your account creation logic here
-                printToOutput(`Account created: ${username}`);
+            const isTaken = await checkUsernameStatus(username);
+            if (isTaken) {
+                printToOutput(`${username} - Taken`, 'red');
             } else {
-                printToOutput(`${username} - Account creation failed. Username might be taken or invalid.`);
+                printToOutput(`${username} - Available`, 'green');
             }
         }
 
-        function printToOutput(message) {
-            outputDiv.textContent += message + '\n';
+        function printToOutput(message, color = 'cyan') {
+            const watermark = 'Watermark: RBLX-Username v1.1 Beta\n';
+            outputDiv.innerHTML += `${watermark}${message}\n`;
             outputDiv.scrollTop = outputDiv.scrollHeight;
+        }
+
+        function clearOutput() {
+            outputDiv.innerHTML = '';
         }
     </script>
 </body>
