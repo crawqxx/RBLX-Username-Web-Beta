@@ -1,32 +1,41 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roblox Username Generator</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <div class="container">
-        <h1>Roblox Username Generator</h1>
-        <div id="status"></div>
-        <div id="form-container">
-            <input type="text" id="username-input" placeholder="Enter username">
-            <button onclick="checkUsername()">Check Username</button>
-        </div>
-        <div id="result"></div>
-        <div id="filter-container">
-            <label for="filter-select">Select Filter:</label>
-            <select id="filter-select">
-                <option value="1">Random 5 Symbols</option>
-                <option value="2">6 Letters</option>
-                <option value="3">5 Symbols with 3 Same</option>
-                <option value="4">6 Symbols with 3 or 4 Same</option>
-                <option value="5">Thin Name</option>
-            </select>
-            <button onclick="generateUsername()">Generate Username</button>
-        </div>
-    </div>
-    <script src="script.js"></script>
-</body>
-</html>
+let showTakenUsernames = true; // Toggle for showing taken usernames
+let generationFilter = 1; // Default filter
+let generatedUsernamesCount = 0;
+
+const generateUsername = () => {
+    if (generationFilter === 1) return generateRandomUsername(5);
+    if (generationFilter === 2) return generate6LetterUsername();
+    if (generationFilter === 3) return generate5SymbolsWith3Same();
+    if (generationFilter === 4) return generate6SymbolsWith3Or4Same();
+    if (generationFilter === 5) return generateThinName();
+};
+
+const generateRandomUsername = (length) => {
+    const characters = 'abcdefghijklmnopqrstuvwxyz0123456789_';
+    let username;
+    do {
+        username = Array.from({length}, () => characters.charAt(Math.floor(Math.random() * characters.length))).join('');
+    } while (username.startsWith('_') || username.endsWith('_') || (length === 5 && !/[0-9]/.test(username)));
+    return username;
+};
+
+// Add similar functions for other filters
+
+document.getElementById('generateButton').onclick = async () => {
+    const username = generateUsername();
+    const status = await checkUsernameStatus(username);
+    displayUsernameStatus(username, status);
+};
+
+const displayUsernameStatus = (username, status) => {
+    const statusElement = document.getElementById('status');
+    if (status === "banned") {
+        statusElement.innerHTML = `${username} - <span class="info">Account is banned</span>`;
+    } else if (status === "taken") {
+        statusElement.innerHTML = `${username} - <span class="success">Account exists (taken)</span>`;
+    } else if (status === "available") {
+        statusElement.innerHTML = `${username} - <span class="error">Account does not exist (available)</span>`;
+    } else {
+        statusElement.innerHTML = `${username} - <span class="error">Unknown status received.</span>`;
+    }
+};
