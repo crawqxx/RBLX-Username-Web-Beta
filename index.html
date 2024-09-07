@@ -3,46 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RBLX Username Generator</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Username Generator</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>RBLX Username Generator</h1>
+        <h1>RBLX-Username v1.1 Beta</h1>
         <div id="watermark">
-            ░█████╗░██████╗░░█████╗░░██╗░░░░░░░██╗░██████╗░██╗░░██╗██╗░░██╗
-            ██╔══██╗██╔══██╗██╔══██╗░██║░░██╗░░██║██╔═══██╗╚██╗██╔╝╚██╗██╔╝
-            ██║░░╚═╝██████╔╝███████║░╚██╗████╗██╔╝██║██╗██║░╚███╔╝░░╚███╔╝░
-            ██║░░██╗██╔══██╗██╔══██║░░████╔═████║░╚██████╔╝░██╔██╗░░██╔██╗░
-            ╚█████╔╝██║░░██║██║░░██║░░╚██╔╝░╚██╔╝░░╚═██╔═╝░██╔╝╚██╗██╔╝╚██╗
-            ░╚════╝░╚═╝░░╚═╝╚═╝░░╚═╝░░░╚═╝░░░╚═╝░░░░░╚═╝░░░╚═╝░░╚═╝╚═╝░░╚═╝
+            <pre>░█████╗░██████╗░░█████╗░░██╗░░░░░░░██╗░██████╗░██╗░░██╗██╗░░██╗</pre>
+            <pre>██╔══██╗██╔══██╗██╔══██╗░██║░░██╗░░██║██╔═══██╗╚██╗██╔╝╚██╗██╔╝</pre>
+            <pre>██║░░╚═╝██████╔╝███████║░╚██╗████╗██╔╝██║██╗██║░╚███╔╝░░╚███╔╝░</pre>
+            <pre>██║░░██╗██╔══██╗██╔══██║░░████╔═████║░╚██████╔╝░██╔██╗░░██╔██╗░</pre>
+            <pre>╚█████╔╝██║░░██║██║░░██║░░╚██╔╝░╚██╔╝░░╚═██╔═╝░██╔╝╚██╗██╔╝╚██╗</pre>
+            <pre>░╚════╝░╚═╝░░╚═╝╚═╝░░╚═╝░░░╚═╝░░░╚═╝░░░░░╚═╝░░░╚═╝░░╚═╝╚═╝░░╚═╝</pre>
         </div>
-        <h2>RBLX-Username v1.1 Beta</h2>
-        <hr>
-
-        <!-- Menu Options -->
-        <div class="menu">
-            <button onclick="generateUsernames()">Generate Usernames</button>
-            <button onclick="checkUsername()">Check Username</button>
-            <button onclick="openSettings()">Settings</button>
+        <div id="main-menu">
+            <h2>Main Menu</h2>
+            <button id="generate-usernames">Generate Usernames</button>
+            <button id="username-checker">Username Checker</button>
+            <button id="settings">Settings</button>
         </div>
-
-        <div id="output"></div>
-
-        <!-- Settings Section -->
-        <div id="settings" style="display: none;">
-            <h3>Settings Menu</h3>
-            <p>1) Toggle showing taken usernames (current: <span id="showTakenUsernames">On</span>)</p>
-            <p>2) Filters (current: Random 5 Symbol)</p>
-            <button onclick="changeFilter(1)">1) Random 5 Symbol</button>
-            <button onclick="changeFilter(2)">2) 6 Letters</button>
-            <button onclick="changeFilter(3)">3) 5 Symbols with 3 Same</button>
-            <button onclick="changeFilter(4)">4) 6 Symbols with 3 or 4 Same</button>
-            <button onclick="changeFilter(5)">5) Thin Name</button>
-            <button onclick="closeSettings()">Close Settings</button>
+        <div id="generation-section" class="hidden">
+            <h2>Username Generation</h2>
+            <p>How many usernames do you want to generate?</p>
+            <input type="number" id="username-count" min="1" max="50" placeholder="Enter a number">
+            <button id="generate">Generate</button>
+            <div id="generated-usernames"></div>
+            <button id="back-to-menu">Back to Menu</button>
+        </div>
+        <div id="settings-section" class="hidden">
+            <h2>Settings</h2>
+            <p>Show taken usernames: <span id="show-taken-status">On</span></p>
+            <button id="toggle-taken-usernames">Toggle</button>
+            <p>Select Filter:</p>
+            <select id="filter-selection">
+                <option value="1">Random 5 Symbols (default)</option>
+                <option value="2">6 Letters</option>
+                <option value="3">5 Symbols with 3 Same</option>
+                <option value="4">6 Symbols with 3 or 4 Same</option>
+                <option value="5">Thin Name (5-6 symbols using 't, i, l, 1, j')</option>
+            </select>
+            <button id="back-from-settings">Back to Menu</button>
         </div>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
