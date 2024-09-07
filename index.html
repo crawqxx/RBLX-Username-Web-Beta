@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Username Generator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>RBLX-Username v1.1 Beta</h1>
+    </header>
+    <main>
+        <section id="settings">
+            <h2>Settings</h2>
+            <label>
+                <input type="checkbox" id="showTakenUsernames" checked>
+                Show Taken Usernames
+            </label>
+            <div>
+                <label for="generationFilter">Generation Filter:</label>
+                <select id="generationFilter">
+                    <option value="1">Random 5 Symbols</option>
+                    <option value="2">6 Letters</option>
+                    <option value="3">5 Symbols with 3 Same</option>
+                    <option value="4">6 Symbols with 3 or 4 Same</option>
+                    <option value="5">Thin Name</option>
+                </select>
+            </div>
+        </section>
+        <section id="generator">
+            <h2>Generate Usernames</h2>
+            <input type="number" id="numberOfUsernames" placeholder="Enter number of usernames">
+            <button onclick="generateUsernames()">Generate</button>
+            <div id="usernameList"></div>
+        </section>
+        <section id="usernameChecker">
+            <h2>Username Checker</h2>
+            <input type="text" id="usernameToCheck" placeholder="Enter username">
+            <button onclick="checkUsername()">Check</button>
+            <div id="checkResult"></div>
+        </section>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>
