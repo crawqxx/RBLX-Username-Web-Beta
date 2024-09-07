@@ -112,7 +112,7 @@
         function showGeneratePage() {
             clearOutput();
             printWatermark();
-            printToOutput('Generating Usernames:\nEnter how many usernames you want to generate (or press Enter to return):');
+            printToOutput('Enter how many usernames you want to generate (or press Enter to return):');
             generatedUsernames = [];
         }
 
@@ -133,12 +133,9 @@
             for (let i = 0; i < number; i++) {
                 let username = generateUsernameByFilter();
                 generatedUsernames.push(username);
-                printToOutput(username);
             }
-            printToOutput(`\nGenerated ${number} usernames so far:`);
-            for (const username of generatedUsernames) {
-                printToOutput(username);
-            }
+            printToOutput(`Generated ${number} usernames so far:`);
+            printToOutput(generatedUsernames.join(' '));
         }
 
         function showUsernameCheckerPage() {
@@ -235,8 +232,7 @@
 ██║░░██╗██╔══██╗██╔══██║░░████╔═████║░╚██████╔╝░██╔██╗░░██╔██╗░
 ╚█████╔╝██║░░██║██║░░██║░░╚██╔╝░╚██╔╝░░╚═██╔═╝░██╔╝╚██╗██╔╝╚██╗
 ░╚════╝░╚═╝░░╚═╝╚═╝░░╚═╝░░░╚═╝░░░╚═╝░░░░░╚═╝░░░╚═╝░░╚═╝╚═╝░░╚═╝
-
-                        RBLX-Username v1.1 Beta
+                RBLX-Username v1.1 Beta
             `;
             printToOutput(watermark, randomColor);
         }
